@@ -1,29 +1,17 @@
 
 import { LightningElement, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { refreshApex } from '@salesforce/apex';
 
-import getTransactions from
-    '@salesforce/apex/TransactionController.getTransactions';
+import {
+    MessageContext,
+    publish
+} from 'lightning/messageService';
+
+import FINSIGHT_FILTER from
+    '@salesforce/messageChannel/FinSightFilter__c';
+
 import createTransaction from
     '@salesforce/apex/TransactionController.createTransaction';
-
-const COLUMNS = [
-    { label: 'Name', fieldName: 'Name' },
-    { label: 'Date', fieldName: 'Transaction_Date__c', type: 'date' },
-    {
-        label: 'Amount',
-        fieldName: 'Amount__c',
-        type: 'currency',
-        typeAttributes: { currencyCode: 'INR' }
-    },
-    { label: 'Type', fieldName: 'Transaction_Type__c' },
-    { label: 'Category', fieldName: 'Category__c' },
-    {
-        label: 'Financial Account',
-        fieldName: 'financialAccountName'
-    }
-];
 
 export default class TransactionManager extends LightningElement {
     name = '';
@@ -35,11 +23,9 @@ export default class TransactionManager extends LightningElement {
     financialAccountId;
 
     isSaving = false;
-    isLoading = true;
 
-    columns = COLUMNS;
-    transactions = [];
-    wiredTransactionsResult;
+    @wire(MessageContext)
+    messageContext;
 
     transactionTypeOptions = [
         { label: 'Income', value: 'Income' },
@@ -59,38 +45,27 @@ export default class TransactionManager extends LightningElement {
         { label: 'Other', value: 'Other' }
     ];
 
-    @wire(getTransactions)
-    wiredTransactions(result) {
-        this.wiredTransactionsResult = result;
-
-        if (result.data) {
-            this.transactions = result.data.map(record => ({
-                ...record,
-                financialAccountName:
-                    record.Financial_Account__r?.Name || '—'
-            }));
-            this.isLoading = false;
-        } else if (result.error) {
-            this.isLoading = false;
-            this.showToast(
-                'Error',
-                this.getErrorMessage(result.error),
-                'error'
-            );
-        }
-    }
-
     handleInputChange(event) {
-        this[event.target.dataset.field] = event.target.value;
+        const field = event.target.dataset.field;
+
+        if (field) {
+            this[field] = event.target.value;
+        }
     }
 
     handleAccountChange(event) {
         this.financialAccountId = event.detail.recordId;
     }
 
-    async handleSave() {
+    validateForm() {
+        const form = this.template.querySelector('.add-form');
+
+        if (!form) {
+            return false;
+        }
+
         const inputs = [
-            ...this.template.querySelectorAll(
+            ...form.querySelectorAll(
                 'lightning-input, lightning-combobox'
             )
         ];
@@ -101,16 +76,34 @@ export default class TransactionManager extends LightningElement {
         );
 
         if (!valid) {
-            return;
+            return false;
         }
 
-        if (!Number.isFinite(Number(this.amount)) ||
-            Number(this.amount) <= 0) {
+        const amountInput = inputs.find(
+            input => input.dataset.field === 'amount'
+        );
+
+        if (
+            amountInput &&
+            (
+                !Number.isFinite(Number(amountInput.value)) ||
+                Number(amountInput.value) <= 0
+            )
+        ) {
             this.showToast(
                 'Invalid Amount',
                 'Enter an amount greater than zero.',
                 'error'
             );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    async handleSave() {
+        if (!this.validateForm()) {
             return;
         }
 
@@ -127,35 +120,54 @@ export default class TransactionManager extends LightningElement {
                 financialAccountId: this.financialAccountId || null
             });
 
+            this.publishTransactionRefresh();
+
             this.showToast(
                 'Success',
                 'Transaction saved successfully.',
                 'success'
             );
 
-            this.name = '';
-            this.amount = '';
-            this.transactionType = 'Expense';
-            this.category = 'Other';
-            this.description = '';
-            this.financialAccountId = undefined;
+            this.resetForm();
 
-            await refreshApex(this.wiredTransactionsResult);
         } catch (error) {
             this.showToast(
                 'Unable to Save',
                 this.getErrorMessage(error),
                 'error'
             );
+
         } finally {
             this.isSaving = false;
         }
     }
 
+    publishTransactionRefresh() {
+        if (!this.messageContext) {
+            return;
+        }
+
+        publish(this.messageContext, FINSIGHT_FILTER, {
+            refreshTransactions: Date.now()
+        });
+    }
+
+    resetForm() {
+        this.name = '';
+        this.transactionDate = new Date().toISOString().slice(0, 10);
+        this.amount = '';
+        this.transactionType = 'Expense';
+        this.category = 'Other';
+        this.description = '';
+        this.financialAccountId = undefined;
+    }
+
     getErrorMessage(error) {
-        return error?.body?.message ||
+        return (
+            error?.body?.message ||
             error?.message ||
-            'An unexpected error occurred.';
+            'An unexpected error occurred.'
+        );
     }
 
     showToast(title, message, variant) {

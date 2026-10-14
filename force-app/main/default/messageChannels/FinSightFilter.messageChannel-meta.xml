@@ -2,13 +2,48 @@
 <LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
     <masterLabel>FinSight Filter</masterLabel>
     <isExposed>true</isExposed>
-    <description>Shares selected month and year between FinSight dashboard components.</description>
+    <description>
+        Shares dashboard date filters and transaction search criteria
+        between FinSight components.
+    </description>
+
     <lightningMessageFields>
         <fieldName>selectedMonth</fieldName>
         <description>Selected transaction month</description>
     </lightningMessageFields>
+
     <lightningMessageFields>
         <fieldName>selectedYear</fieldName>
         <description>Selected transaction year</description>
+    </lightningMessageFields>
+
+    <lightningMessageFields>
+        <fieldName>searchTerm</fieldName>
+        <description>Transaction name search term</description>
+    </lightningMessageFields>
+
+    <lightningMessageFields>
+        <fieldName>transactionType</fieldName>
+        <description>Income or Expense filter</description>
+    </lightningMessageFields>
+
+    <lightningMessageFields>
+        <fieldName>category</fieldName>
+        <description>Transaction category filter</description>
+    </lightningMessageFields>
+
+    <lightningMessageFields>
+        <fieldName>startDate</fieldName>
+        <description>Transaction filter start date</description>
+    </lightningMessageFields>
+
+    <lightningMessageFields>
+        <fieldName>endDate</fieldName>
+        <description>Transaction filter end date</description>
+    </lightningMessageFields>
+
+    <lightningMessageFields>
+        <fieldName>refreshTransactions</fieldName>
+        <description>Signals that transaction records have changed</description>
     </lightningMessageFields>
 </LightningMessageChannel>

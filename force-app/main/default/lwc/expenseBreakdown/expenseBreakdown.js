@@ -1,9 +1,16 @@
 
 import { LightningElement, api, wire } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
+import { refreshApex } from '@salesforce/apex';
 import CHARTJS from '@salesforce/resourceUrl/chartjs';
 
-import { MessageContext, subscribe, APPLICATION_SCOPE } from 'lightning/messageService';
+import {
+    MessageContext,
+    subscribe,
+    unsubscribe,
+    APPLICATION_SCOPE
+} from 'lightning/messageService';
+
 import FINSIGHT_FILTER from
     '@salesforce/messageChannel/FinSightFilter__c';
 
@@ -18,9 +25,12 @@ export default class ExpenseBreakdown extends LightningElement {
     errorMessage;
     chart;
     chartJsInitialized = false;
+    chartLoadPromise;
+    wiredExpensesResult;
+    subscription;
+
     @wire(MessageContext)
     messageContext;
-    subscription;
 
     @api
     get selectedMonth() {
@@ -48,7 +58,11 @@ export default class ExpenseBreakdown extends LightningElement {
         selectedMonth: '$selectedMonthNumber',
         selectedYear: '$selectedYearNumber'
     })
-    wiredExpenses({ data, error }) {
+    wiredExpenses(result) {
+        this.wiredExpensesResult = result;
+
+        const { data, error } = result;
+
         if (data) {
             this.expenses = data.filter(
                 item => Number(item.totalAmount) > 0
@@ -56,9 +70,7 @@ export default class ExpenseBreakdown extends LightningElement {
 
             this.errorMessage = undefined;
 
-            if (this.expenses.length === 0) {
-                this.destroyChart();
-            } else {
+            if (this.chartJsInitialized) {
                 this.updateChart();
             }
         } else if (error) {
@@ -66,6 +78,7 @@ export default class ExpenseBreakdown extends LightningElement {
             this.errorMessage =
                 error.body?.message ||
                 'Unable to load expense breakdown.';
+
             this.destroyChart();
         }
     }
@@ -83,18 +96,27 @@ export default class ExpenseBreakdown extends LightningElement {
     }
 
     renderedCallback() {
+        // Keep updating the chart when LWC rerenders the canvas.
         if (this.chartJsInitialized) {
             this.updateChart();
             return;
         }
 
-        this.chartJsInitialized = true;
+        // Avoid loading Chart.js more than once.
+        if (this.chartLoadPromise) {
+            return;
+        }
 
-        loadScript(this, CHARTJS + '/chart.umd.min.js')
+        this.chartLoadPromise = loadScript(
+            this,
+            CHARTJS + '/chart.umd.min.js'
+        )
             .then(() => {
+                this.chartJsInitialized = true;
                 this.updateChart();
             })
             .catch(() => {
+                this.chartLoadPromise = undefined;
                 this.errorMessage =
                     'Unable to load Chart.js. Check the chartjs static resource ZIP.';
             });
@@ -103,6 +125,7 @@ export default class ExpenseBreakdown extends LightningElement {
     updateChart() {
         if (
             !this.isConnected ||
+            !this.chartJsInitialized ||
             !window.Chart ||
             !this.template.querySelector('canvas')
         ) {
@@ -188,10 +211,6 @@ export default class ExpenseBreakdown extends LightningElement {
         }
     }
 
-    disconnectedCallback() {
-        this.destroyChart();
-    }
-
     connectedCallback() {
         this.subscribeToFilters();
     }
@@ -204,11 +223,60 @@ export default class ExpenseBreakdown extends LightningElement {
         this.subscription = subscribe(
             this.messageContext,
             FINSIGHT_FILTER,
-            (message) => {
-                this._selectedMonth = String(message.selectedMonth);
-                this._selectedYear = String(message.selectedYear);
+            message => {
+                if (
+                    message.selectedMonth !== undefined &&
+                    message.selectedMonth !== null &&
+                    message.selectedMonth !== ''
+                ) {
+                    const month = String(message.selectedMonth);
+
+                    if (month !== this._selectedMonth) {
+                        this._selectedMonth = month;
+                    }
+                }
+
+                if (
+                    message.selectedYear !== undefined &&
+                    message.selectedYear !== null &&
+                    message.selectedYear !== ''
+                ) {
+                    const year = String(message.selectedYear);
+
+                    if (year !== this._selectedYear) {
+                        this._selectedYear = year;
+                    }
+                }
+
+                if (message.refreshTransactions) {
+                    this.refreshExpenseData();
+                }
             },
             { scope: APPLICATION_SCOPE }
         );
+    }
+
+    async refreshExpenseData() {
+        if (!this.wiredExpensesResult) {
+            return;
+        }
+
+        try {
+            await refreshApex(this.wiredExpensesResult);
+        } catch (error) {
+            this.errorMessage =
+                error.body?.message ||
+                error.message ||
+                'Unable to refresh expense breakdown.';
+        }
+    }
+
+    disconnectedCallback() {
+        if (this.subscription) {
+            unsubscribe(this.subscription);
+            this.subscription = undefined;
+        }
+
+        this.destroyChart();
     }
 }
