@@ -57,6 +57,16 @@ export default class TransactionManager extends LightningElement {
         this.financialAccountId = event.detail.recordId;
     }
 
+    handleCancel() {
+        if (this.isSaving) {
+            return;
+        }
+
+        this.dispatchEvent(
+            new CustomEvent('closemodal')
+        );
+    }
+
     validateForm() {
         const form = this.template.querySelector('.add-form');
 
@@ -130,13 +140,17 @@ export default class TransactionManager extends LightningElement {
 
             this.resetForm();
 
+            // Notify the dashboard to close the modal and refresh.
+            this.dispatchEvent(
+                new CustomEvent('transactionsaved')
+            );
+
         } catch (error) {
             this.showToast(
                 'Unable to Save',
                 this.getErrorMessage(error),
                 'error'
             );
-
         } finally {
             this.isSaving = false;
         }

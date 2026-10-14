@@ -6,10 +6,6 @@
 
         <div class="slds-p-around_medium add-form">
 
-            <h2 class="slds-text-heading_medium slds-m-bottom_medium">
-                Add Transaction
-            </h2>
-
             <lightning-input
                 label="Transaction Name"
                 value={name}
@@ -77,8 +73,15 @@
                 onchange={handleAccountChange}>
             </lightning-record-picker>
 
-            <div class="slds-m-top_medium">
+            <div class="slds-m-top_medium slds-grid slds-grid_align-end">
                 <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}
+                    disabled={isSaving}>
+                </lightning-button>
+
+                <lightning-button
+                    class="slds-m-left_small"
                     label="Save Transaction"
                     variant="brand"
                     onclick={handleSave}

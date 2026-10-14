@@ -2,7 +2,11 @@
 import { LightningElement, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 
-import { publish, MessageContext } from 'lightning/messageService';
+import {
+    publish,
+    MessageContext
+} from 'lightning/messageService';
+
 import FINSIGHT_FILTER from
     '@salesforce/messageChannel/FinSightFilter__c';
 
@@ -18,9 +22,12 @@ export default class FinsightDashboard extends LightningElement {
     summary;
     errorMessage;
     isLoading = true;
+    isAddModalOpen = false;
     wiredResult;
+
     @wire(MessageContext)
     messageContext;
+
     initialPeriodPublished = false;
 
     monthOptions = [
@@ -43,7 +50,11 @@ export default class FinsightDashboard extends LightningElement {
 
         return Array.from({ length: 7 }, (_, index) => {
             const year = currentYear - 3 + index;
-            return { label: String(year), value: String(year) };
+
+            return {
+                label: String(year),
+                value: String(year)
+            };
         });
     }
 
@@ -67,7 +78,6 @@ export default class FinsightDashboard extends LightningElement {
         }
     }
 
-    
     get selectedMonthNumber() {
         return Number(this.selectedMonth);
     }
@@ -89,7 +99,9 @@ export default class FinsightDashboard extends LightningElement {
     }
 
     get formattedSavingsRate() {
-        return `${Number(this.summary?.savingsRate || 0).toFixed(2)}%`;
+        return `${Number(
+            this.summary?.savingsRate || 0
+        ).toFixed(2)}%`;
     }
 
     formatCurrency(value) {
@@ -112,22 +124,42 @@ export default class FinsightDashboard extends LightningElement {
         this.publishSelectedPeriod();
     }
 
+    handleOpenAddModal() {
+        this.isAddModalOpen = true;
+    }
+
+    handleCloseAddModal() {
+        this.isAddModalOpen = false;
+    }
+
+    async handleTransactionSaved() {
+        this.isAddModalOpen = false;
+        await this.handleRefresh();
+    }
+
     async handleRefresh() {
         this.isLoading = true;
+        this.errorMessage = undefined;
 
         try {
-            await Promise.all([
-                refreshApex(this.wiredResult),
-            ]);
+            if (this.wiredResult) {
+                await refreshApex(this.wiredResult);
+            }
         } catch (error) {
             this.errorMessage =
-                error?.body?.message || 'Refresh failed.';
+                error?.body?.message ||
+                error?.message ||
+                'Refresh failed.';
         } finally {
             this.isLoading = false;
         }
     }
 
     publishSelectedPeriod() {
+        if (!this.messageContext) {
+            return;
+        }
+
         publish(this.messageContext, FINSIGHT_FILTER, {
             selectedMonth: this.selectedMonthNumber,
             selectedYear: this.selectedYearNumber
@@ -135,7 +167,10 @@ export default class FinsightDashboard extends LightningElement {
     }
 
     renderedCallback() {
-        if (!this.initialPeriodPublished && this.messageContext) {
+        if (
+            !this.initialPeriodPublished &&
+            this.messageContext
+        ) {
             this.initialPeriodPublished = true;
             this.publishSelectedPeriod();
         }
