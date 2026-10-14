@@ -9,10 +9,7 @@ public with sharing class TransactionController {
                    Transaction_Date__c,
                    Amount__c,
                    Transaction_Type__c,
-                   Category__c,
-                   Description__c,
-                   Financial_Account__c,
-                   Financial_Account__r.Name
+                   Category__c
             FROM Transaction__c
             WITH USER_MODE
             ORDER BY Transaction_Date__c DESC, CreatedDate DESC
@@ -66,9 +63,7 @@ public with sharing class TransactionController {
             Transaction_Date__c = transactionDate,
             Amount__c = amount,
             Transaction_Type__c = transactionType,
-            Category__c = category,
-            Description__c = description,
-            Financial_Account__c = financialAccountId
+            Category__c = category
         );
 
         insert as user transactionRecord;

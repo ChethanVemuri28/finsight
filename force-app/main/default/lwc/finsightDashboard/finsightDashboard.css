@@ -1,0 +1,37 @@
+
+.metric-card {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    min-height: 115px;
+    background: #f5f7fb;
+    border-left: 4px solid #64748b;
+}
+
+.metric-card p {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 0.65rem;
+}
+
+.metric-card h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+
+.metric-card.income {
+    border-left-color: #16a34a;
+}
+
+.metric-card.expense {
+    border-left-color: #dc2626;
+}
+
+.metric-card.savings {
+    border-left-color: #2563eb;
+}
+
+.metric-card.rate {
+    border-left-color: #7c3aed;
+}

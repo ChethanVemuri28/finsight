@@ -3,6 +3,7 @@
     <fullName>Account_Type__c</fullName>
     <label>Account Type</label>
     <required>true</required>
+    <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>

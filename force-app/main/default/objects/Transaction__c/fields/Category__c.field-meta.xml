@@ -3,21 +3,62 @@
     <fullName>Category__c</fullName>
     <label>Category</label>
     <required>true</required>
+    <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>
         <valueSetDefinition>
             <sorted>false</sorted>
-            <value><fullName>Salary</fullName><default>false</default><label>Salary</label></value>
-            <value><fullName>Food</fullName><default>false</default><label>Food</label></value>
-            <value><fullName>Housing</fullName><default>false</default><label>Housing</label></value>
-            <value><fullName>Transport</fullName><default>false</default><label>Transport</label></value>
-            <value><fullName>Utilities</fullName><default>false</default><label>Utilities</label></value>
-            <value><fullName>Shopping</fullName><default>false</default><label>Shopping</label></value>
-            <value><fullName>Healthcare</fullName><default>false</default><label>Healthcare</label></value>
-            <value><fullName>Investment</fullName><default>false</default><label>Investment</label></value>
-            <value><fullName>Entertainment</fullName><default>false</default><label>Entertainment</label></value>
-            <value><fullName>Other</fullName><default>true</default><label>Other</label></value>
+            <value>
+                <fullName>Salary</fullName>
+                <default>false</default>
+                <label>Salary</label>
+            </value>
+            <value>
+                <fullName>Food</fullName>
+                <default>false</default>
+                <label>Food</label>
+            </value>
+            <value>
+                <fullName>Housing</fullName>
+                <default>false</default>
+                <label>Housing</label>
+            </value>
+            <value>
+                <fullName>Transport</fullName>
+                <default>false</default>
+                <label>Transport</label>
+            </value>
+            <value>
+                <fullName>Utilities</fullName>
+                <default>false</default>
+                <label>Utilities</label>
+            </value>
+            <value>
+                <fullName>Shopping</fullName>
+                <default>false</default>
+                <label>Shopping</label>
+            </value>
+            <value>
+                <fullName>Healthcare</fullName>
+                <default>false</default>
+                <label>Healthcare</label>
+            </value>
+            <value>
+                <fullName>Investment</fullName>
+                <default>false</default>
+                <label>Investment</label>
+            </value>
+            <value>
+                <fullName>Entertainment</fullName>
+                <default>false</default>
+                <label>Entertainment</label>
+            </value>
+            <value>
+                <fullName>Other</fullName>
+                <default>true</default>
+                <label>Other</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>
