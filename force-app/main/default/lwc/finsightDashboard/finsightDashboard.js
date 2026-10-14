@@ -1,6 +1,11 @@
 
 import { LightningElement, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+
+import { publish, MessageContext } from 'lightning/messageService';
+import FINSIGHT_FILTER from
+    '@salesforce/messageChannel/FinSightFilter__c';
+
 import getMonthlySummary from
     '@salesforce/apex/FinSightDashboardController.getMonthlySummary';
 
@@ -14,6 +19,9 @@ export default class FinsightDashboard extends LightningElement {
     errorMessage;
     isLoading = true;
     wiredResult;
+    @wire(MessageContext)
+    messageContext;
+    initialPeriodPublished = false;
 
     monthOptions = [
         { label: 'January', value: '1' },
@@ -59,6 +67,7 @@ export default class FinsightDashboard extends LightningElement {
         }
     }
 
+    
     get selectedMonthNumber() {
         return Number(this.selectedMonth);
     }
@@ -94,23 +103,41 @@ export default class FinsightDashboard extends LightningElement {
     handleMonthChange(event) {
         this.isLoading = true;
         this.selectedMonth = event.detail.value;
+        this.publishSelectedPeriod();
     }
 
     handleYearChange(event) {
         this.isLoading = true;
         this.selectedYear = event.detail.value;
+        this.publishSelectedPeriod();
     }
 
     async handleRefresh() {
         this.isLoading = true;
 
         try {
-            await refreshApex(this.wiredResult);
+            await Promise.all([
+                refreshApex(this.wiredResult),
+            ]);
         } catch (error) {
             this.errorMessage =
                 error?.body?.message || 'Refresh failed.';
         } finally {
             this.isLoading = false;
+        }
+    }
+
+    publishSelectedPeriod() {
+        publish(this.messageContext, FINSIGHT_FILTER, {
+            selectedMonth: this.selectedMonthNumber,
+            selectedYear: this.selectedYearNumber
+        });
+    }
+
+    renderedCallback() {
+        if (!this.initialPeriodPublished && this.messageContext) {
+            this.initialPeriodPublished = true;
+            this.publishSelectedPeriod();
         }
     }
 }

@@ -1,0 +1,51 @@
+
+<template>
+    <lightning-card
+        title="Expense Breakdown"
+        icon-name="standard:chart">
+
+        <div class="slds-p-around_medium">
+
+            <template lwc:if={errorMessage}>
+                <div class="slds-text-color_error slds-m-bottom_medium">
+                    {errorMessage}
+                </div>
+            </template>
+
+            <template lwc:if={hasExpenses}>
+                <div class="chart-container">
+                    <canvas
+                        class="expense-chart"
+                        lwc:dom="manual">
+                    </canvas>
+                </div>
+            </template>
+
+            <template lwc:else>
+                <template lwc:if={errorMessage}>
+                    <!-- Error message is displayed above. -->
+                </template>
+
+                <template lwc:else>
+                    <div class="empty-state">
+                        <lightning-icon
+                            icon-name="utility:chart"
+                            size="medium"
+                            alternative-text="No expenses">
+                        </lightning-icon>
+
+                        <p class="empty-title">
+                            No expenses recorded
+                        </p>
+
+                        <p class="empty-description">
+                            There are no expenses for the selected month.
+                            Add an expense transaction to see your breakdown.
+                        </p>
+                    </div>
+                </template>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

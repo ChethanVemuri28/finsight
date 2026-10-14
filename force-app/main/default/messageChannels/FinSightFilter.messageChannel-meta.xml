@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>FinSight Filter</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Shares selected month and year between FinSight dashboard components.</description>
+    <lightningMessageFields>
+        <fieldName>selectedMonth</fieldName>
+        <description>Selected transaction month</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>selectedYear</fieldName>
+        <description>Selected transaction year</description>
+    </lightningMessageFields>
+</LightningMessageChannel>
