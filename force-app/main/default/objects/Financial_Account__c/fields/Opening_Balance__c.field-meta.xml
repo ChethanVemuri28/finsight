@@ -3,6 +3,8 @@
     <fullName>Opening_Balance__c</fullName>
     <label>Opening Balance</label>
     <precision>16</precision>
+    <required>false</required>
     <scale>2</scale>
+    <trackTrending>false</trackTrending>
     <type>Currency</type>
 </CustomField>

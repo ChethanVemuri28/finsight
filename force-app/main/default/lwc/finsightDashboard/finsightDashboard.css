@@ -1,0 +1,99 @@
+
+.metric-card {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    min-height: 115px;
+    background: #f5f7fb;
+    border-left: 4px solid #64748b;
+}
+
+.metric-card p {
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 0.65rem;
+}
+
+.metric-card h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+
+.metric-card.income {
+    border-left-color: #16a34a;
+}
+
+.metric-card.expense {
+    border-left-color: #dc2626;
+}
+
+.metric-card.savings {
+    border-left-color: #2563eb;
+}
+
+.metric-card.rate {
+    border-left-color: #7c3aed;
+}
+
+.expense-section {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 1.25rem;
+}
+
+.section-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #181818;
+}
+
+.section-subtitle {
+    margin-top: 0.25rem;
+    color: #706e6b;
+    font-size: 0.85rem;
+}
+
+.category-row {
+    margin-bottom: 1.25rem;
+}
+
+.category-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.45rem;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #333333;
+}
+
+.category-amount {
+    font-weight: 600;
+    white-space: nowrap;
+    color: #181818;
+}
+
+.bar-track {
+    width: 100%;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #eeeeee;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: #20a675;
+    transition: width 0.3s ease;
+}
+
+.empty-state {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background: #f7f7f7;
+    color: #706e6b;
+}

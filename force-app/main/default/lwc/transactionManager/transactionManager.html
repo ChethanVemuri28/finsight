@@ -1,0 +1,94 @@
+
+<template>
+    <lightning-card
+        title="FinSight — Add Transaction"
+        icon-name="standard:orders">
+
+        <div class="slds-p-around_medium add-form">
+
+            <lightning-input
+                label="Transaction Name"
+                value={name}
+                data-field="name"
+                onchange={handleInputChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                class="slds-m-top_small"
+                type="date"
+                label="Transaction Date"
+                value={transactionDate}
+                data-field="transactionDate"
+                onchange={handleInputChange}
+                required>
+            </lightning-input>
+
+            <lightning-input
+                class="slds-m-top_small"
+                type="number"
+                label="Amount (₹)"
+                value={amount}
+                data-field="amount"
+                onchange={handleInputChange}
+                min="0.01"
+                step="0.01"
+                required>
+            </lightning-input>
+
+            <lightning-combobox
+                class="slds-m-top_small"
+                label="Transaction Type"
+                value={transactionType}
+                data-field="transactionType"
+                options={transactionTypeOptions}
+                onchange={handleInputChange}
+                required>
+            </lightning-combobox>
+
+            <lightning-combobox
+                class="slds-m-top_small"
+                label="Category"
+                value={category}
+                data-field="category"
+                options={categoryOptions}
+                onchange={handleInputChange}
+                required>
+            </lightning-combobox>
+
+            <lightning-textarea
+                class="slds-m-top_small"
+                label="Description"
+                value={description}
+                data-field="description"
+                onchange={handleInputChange}>
+            </lightning-textarea>
+
+            <lightning-record-picker
+                class="slds-m-top_small"
+                label="Financial Account (Optional)"
+                placeholder="Search financial accounts..."
+                object-api-name="Financial_Account__c"
+                value={financialAccountId}
+                onchange={handleAccountChange}>
+            </lightning-record-picker>
+
+            <div class="slds-m-top_medium slds-grid slds-grid_align-end">
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}
+                    disabled={isSaving}>
+                </lightning-button>
+
+                <lightning-button
+                    class="slds-m-left_small"
+                    label="Save Transaction"
+                    variant="brand"
+                    onclick={handleSave}
+                    disabled={isSaving}>
+                </lightning-button>
+            </div>
+
+        </div>
+    </lightning-card>
+</template>

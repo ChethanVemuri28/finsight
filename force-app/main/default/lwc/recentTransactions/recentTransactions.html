@@ -1,0 +1,123 @@
+
+<template>
+    <lightning-card
+        title="Recent Transactions"
+        icon-name="standard:orders">
+
+        <div class="slds-p-around_medium">
+            <lightning-datatable
+                key-field="Id"
+                data={transactions}
+                columns={columns}
+                is-loading={isLoading}
+                hide-checkbox-column
+                onrowaction={handleRowAction}>
+            </lightning-datatable>
+
+            <template lwc:if={isEmpty}>
+                <p class="slds-p-top_medium slds-text-color_weak">
+                    No transactions match your search or filters.
+                </p>
+            </template>
+        </div>
+    </lightning-card>
+
+    <!-- Edit Transaction Modal -->
+    <template lwc:if={isEditModalOpen}>
+        <section
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-labelledby="edit-modal-heading"
+            class="slds-modal slds-fade-in-open">
+
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        alternative-text="Close"
+                        title="Close"
+                        onclick={closeEditModal}
+                        class="slds-modal__close">
+                    </lightning-button-icon>
+
+                    <h2
+                        id="edit-modal-heading"
+                        class="slds-text-heading_medium">
+                        Edit Transaction
+                    </h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium edit-form">
+                    <lightning-input
+                        label="Transaction Name"
+                        value={editName}
+                        data-field="editName"
+                        onchange={handleEditInputChange}
+                        required>
+                    </lightning-input>
+
+                    <lightning-input
+                        class="slds-m-top_small"
+                        type="date"
+                        label="Transaction Date"
+                        value={editDate}
+                        data-field="editDate"
+                        onchange={handleEditInputChange}
+                        required>
+                    </lightning-input>
+
+                    <lightning-input
+                        class="slds-m-top_small"
+                        type="number"
+                        label="Amount (₹)"
+                        value={editAmount}
+                        data-field="editAmount"
+                        onchange={handleEditInputChange}
+                        min="0.01"
+                        step="0.01"
+                        required>
+                    </lightning-input>
+
+                    <lightning-combobox
+                        class="slds-m-top_small"
+                        label="Transaction Type"
+                        value={editType}
+                        data-field="editType"
+                        options={transactionTypeOptions}
+                        onchange={handleEditInputChange}
+                        required>
+                    </lightning-combobox>
+
+                    <lightning-combobox
+                        class="slds-m-top_small"
+                        label="Category"
+                        value={editCategory}
+                        data-field="editCategory"
+                        options={categoryOptions}
+                        onchange={handleEditInputChange}
+                        required>
+                    </lightning-combobox>
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={closeEditModal}
+                        disabled={isSaving}>
+                    </lightning-button>
+
+                    <lightning-button
+                        class="slds-m-left_small"
+                        label="Save Changes"
+                        variant="brand"
+                        onclick={handleUpdate}
+                        disabled={isSaving}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>
