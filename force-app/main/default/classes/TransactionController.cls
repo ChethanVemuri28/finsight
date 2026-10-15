@@ -23,16 +23,34 @@ public with sharing class TransactionController {
         String transactionType,
         String category,
         Date startDate,
-        Date endDate
+        Date endDate,
+        Integer selectedMonth,
+        Integer selectedYear
     ) {
-
-        if (startDate != null && endDate != null && startDate > endDate) {
+        if (startDate != null && endDate != null &&
+            startDate > endDate) {
             throw new AuraHandledException(
                 'Start date cannot be after end date.'
             );
         }
+
+        if (selectedMonth != null &&
+            (selectedMonth < 1 || selectedMonth > 12)) {
+            throw new AuraHandledException(
+                'Selected month must be between 1 and 12.'
+            );
+        }
+
+        if (selectedYear != null &&
+            (selectedYear < 2000 || selectedYear > 2100)) {
+            throw new AuraHandledException(
+                'Selected year must be between 2000 and 2100.'
+            );
+        }
+
         List<String> conditions = new List<String>();
-        Map<String, Object> bindValues = new Map<String, Object>();
+        Map<String, Object> bindValues =
+            new Map<String, Object>();
 
         if (String.isNotBlank(searchTerm)) {
             conditions.add('Name LIKE :searchPattern');
@@ -43,7 +61,9 @@ public with sharing class TransactionController {
         }
 
         if (String.isNotBlank(transactionType)) {
-            conditions.add('Transaction_Type__c = :transactionType');
+            conditions.add(
+                'Transaction_Type__c = :transactionType'
+            );
             bindValues.put('transactionType', transactionType);
         }
 
@@ -53,13 +73,38 @@ public with sharing class TransactionController {
         }
 
         if (startDate != null) {
-            conditions.add('Transaction_Date__c >= :startDate');
+            conditions.add(
+                'Transaction_Date__c >= :startDate'
+            );
             bindValues.put('startDate', startDate);
         }
 
         if (endDate != null) {
-            conditions.add('Transaction_Date__c <= :endDate');
+            conditions.add(
+                'Transaction_Date__c <= :endDate'
+            );
             bindValues.put('endDate', endDate);
+        }
+
+        // Restrict transactions to the dashboard's selected month.
+        if (selectedMonth != null && selectedYear != null) {
+            Date monthStart = Date.newInstance(
+                selectedYear,
+                selectedMonth,
+                1
+            );
+
+            Date nextMonthStart = monthStart.addMonths(1);
+
+            conditions.add(
+                'Transaction_Date__c >= :monthStart'
+            );
+            conditions.add(
+                'Transaction_Date__c < :nextMonthStart'
+            );
+
+            bindValues.put('monthStart', monthStart);
+            bindValues.put('nextMonthStart', nextMonthStart);
         }
 
         String query =
@@ -68,7 +113,8 @@ public with sharing class TransactionController {
             'FROM Transaction__c';
 
         if (!conditions.isEmpty()) {
-            query += ' WHERE ' + String.join(conditions, ' AND ');
+            query += ' WHERE ' +
+                String.join(conditions, ' AND ');
         }
 
         query +=
@@ -100,13 +146,14 @@ public with sharing class TransactionController {
             category
         );
 
-        Transaction__c transactionRecord = new Transaction__c(
-            Name = name.trim(),
-            Transaction_Date__c = transactionDate,
-            Amount__c = amount,
-            Transaction_Type__c = transactionType,
-            Category__c = category
-        );
+        Transaction__c transactionRecord =
+            new Transaction__c(
+                Name = name.trim(),
+                Transaction_Date__c = transactionDate,
+                Amount__c = amount,
+                Transaction_Type__c = transactionType,
+                Category__c = category
+            );
 
         insert as user transactionRecord;
 
@@ -136,14 +183,15 @@ public with sharing class TransactionController {
             category
         );
 
-        Transaction__c transactionRecord = new Transaction__c(
-            Id = transactionId,
-            Name = name.trim(),
-            Transaction_Date__c = transactionDate,
-            Amount__c = amount,
-            Transaction_Type__c = transactionType,
-            Category__c = category
-        );
+        Transaction__c transactionRecord =
+            new Transaction__c(
+                Id = transactionId,
+                Name = name.trim(),
+                Transaction_Date__c = transactionDate,
+                Amount__c = amount,
+                Transaction_Type__c = transactionType,
+                Category__c = category
+            );
 
         update as user transactionRecord;
     }

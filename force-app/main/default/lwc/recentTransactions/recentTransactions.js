@@ -22,6 +22,8 @@ import updateTransaction from
 import deleteTransaction from
     '@salesforce/apex/TransactionController.deleteTransaction';
 
+const today = new Date();
+
 const COLUMNS = [
     { label: 'Name', fieldName: 'Name' },
     {
@@ -56,6 +58,7 @@ export default class RecentTransactions extends LightningElement {
     isLoading = true;
     isSaving = false;
     isEditModalOpen = false;
+    isFilterModalOpen = false;
     editingTransactionId;
 
     editName = '';
@@ -69,6 +72,10 @@ export default class RecentTransactions extends LightningElement {
     category = '';
     startDate = null;
     endDate = null;
+
+    // Default period matches the dashboard's initial period.
+    selectedMonth = today.getMonth() + 1;
+    selectedYear = today.getFullYear();
 
     subscription;
     lastRefreshToken;
@@ -98,6 +105,14 @@ export default class RecentTransactions extends LightningElement {
         this.subscribeToFilters();
     }
 
+    renderedCallback() {
+        // The message context may not have been available
+        // when connectedCallback first ran.
+        if (!this.subscription && this.messageContext) {
+            this.subscribeToFilters();
+        }
+    }
+
     disconnectedCallback() {
         if (this.subscription) {
             unsubscribe(this.subscription);
@@ -121,6 +136,34 @@ export default class RecentTransactions extends LightningElement {
     handleFilterMessage(message) {
         let filtersChanged = false;
 
+        // Dashboard financial period.
+        if (message.selectedMonth !== undefined) {
+            const month = Number(message.selectedMonth);
+
+            if (
+                month >= 1 &&
+                month <= 12 &&
+                month !== this.selectedMonth
+            ) {
+                this.selectedMonth = month;
+                filtersChanged = true;
+            }
+        }
+
+        if (message.selectedYear !== undefined) {
+            const year = Number(message.selectedYear);
+
+            if (
+                year >= 2000 &&
+                year <= 2100 &&
+                year !== this.selectedYear
+            ) {
+                this.selectedYear = year;
+                filtersChanged = true;
+            }
+        }
+
+        // Search and filter criteria.
         if (
             message.searchTerm !== undefined &&
             message.searchTerm !== this.searchTerm
@@ -165,6 +208,7 @@ export default class RecentTransactions extends LightningElement {
             this.isLoading = true;
         }
 
+        // Refresh after another component creates or changes a record.
         if (
             message.refreshTransactions &&
             message.refreshTransactions !== this.lastRefreshToken
@@ -179,7 +223,9 @@ export default class RecentTransactions extends LightningElement {
         transactionType: '$transactionType',
         category: '$category',
         startDate: '$startDate',
-        endDate: '$endDate'
+        endDate: '$endDate',
+        selectedMonth: '$selectedMonth',
+        selectedYear: '$selectedYear'
     })
     wiredTransactionData(result) {
         this.wiredTransactionsResult = result;
@@ -201,6 +247,42 @@ export default class RecentTransactions extends LightningElement {
 
     get isEmpty() {
         return !this.isLoading && this.transactions.length === 0;
+    }
+
+    get filterModalClass() {
+        return this.isFilterModalOpen
+            ? 'slds-modal slds-fade-in-open'
+            : 'slds-modal';
+    }
+
+    openFilterModal() {
+        this.isFilterModalOpen = true;
+    }
+
+    closeFilterModal() {
+        this.isFilterModalOpen = false;
+    }
+
+    handleFilterApply() {
+        this.isFilterModalOpen = false;
+    }
+
+    handleFilterError(event) {
+        this.showToast(
+            'Invalid Date Range',
+            event.detail,
+            'error'
+        );
+    }
+
+    handleResetFilters() {
+        publish(this.messageContext, FINSIGHT_FILTER, {
+            searchTerm: '',
+            transactionType: '',
+            category: '',
+            startDate: null,
+            endDate: null
+        });
     }
 
     handleRowAction(event) {

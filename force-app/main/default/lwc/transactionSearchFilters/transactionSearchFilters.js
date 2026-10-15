@@ -1,5 +1,6 @@
 
 import { LightningElement, wire } from 'lwc';
+
 import {
     MessageContext,
     publish
@@ -40,59 +41,58 @@ export default class TransactionSearchFilters extends LightningElement {
 
     handleSearchChange(event) {
         this.searchTerm = event.target.value;
-        this.publishFilters();
     }
 
     handleTypeChange(event) {
         this.transactionType = event.detail.value;
-        this.publishFilters();
     }
 
     handleCategoryChange(event) {
         this.category = event.detail.value;
-        this.publishFilters();
     }
 
     handleStartDateChange(event) {
-        this.startDate = event.target.value || null;
+        const newDate = event.target.value || null;
 
-        if (!this.validateDateRange()) {
-            event.target.value = '';
-            this.startDate = null;
-            return;
-        }
-
-        this.publishFilters();
-    }
-
-    handleEndDateChange(event) {
-        this.endDate = event.target.value || null;
-
-        if (!this.validateDateRange()) {
-            event.target.value = '';
-            this.endDate = null;
-            return;
-        }
-
-        this.publishFilters();
-    }
-
-    validateDateRange() {
         if (
-            this.startDate &&
+            newDate &&
             this.endDate &&
-            this.startDate > this.endDate
+            newDate > this.endDate
         ) {
+            event.target.value = this.startDate || '';
+
             this.dispatchEvent(
                 new CustomEvent('filtererror', {
                     detail: 'From Date cannot be later than To Date.'
                 })
             );
 
-            return false;
+            return;
         }
 
-        return true;
+        this.startDate = newDate;
+    }
+
+    handleEndDateChange(event) {
+        const newDate = event.target.value || null;
+
+        if (
+            newDate &&
+            this.startDate &&
+            newDate < this.startDate
+        ) {
+            event.target.value = this.endDate || '';
+
+            this.dispatchEvent(
+                new CustomEvent('filtererror', {
+                    detail: 'To Date cannot be earlier than From Date.'
+                })
+            );
+
+            return;
+        }
+
+        this.endDate = newDate;
     }
 
     handleClearFilters() {
@@ -101,17 +101,21 @@ export default class TransactionSearchFilters extends LightningElement {
         this.category = '';
         this.startDate = null;
         this.endDate = null;
-
-        this.publishFilters();
     }
 
-    publishFilters() {
+    handleApplyFilters() {
+        if (!this.messageContext) {
+            return;
+        }
+
         publish(this.messageContext, FINSIGHT_FILTER, {
-            searchTerm: this.searchTerm,
+            searchTerm: this.searchTerm.trim(),
             transactionType: this.transactionType,
             category: this.category,
             startDate: this.startDate,
             endDate: this.endDate
         });
+
+        this.dispatchEvent(new CustomEvent('filterapply'));
     }
 }

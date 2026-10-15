@@ -4,6 +4,23 @@
         title="Recent Transactions"
         icon-name="standard:orders">
 
+        
+        <div slot="actions" class="header-actions">
+            <lightning-button
+                label="Reset"
+                icon-name="utility:refresh"
+                variant="neutral"
+                onclick={handleResetFilters}>
+            </lightning-button>
+
+            <lightning-button
+                label="Filter"
+                icon-name="utility:filterList"
+                variant="brand"
+                onclick={openFilterModal}>
+            </lightning-button>
+        </div>
+
         <div class="slds-p-around_medium">
             <lightning-datatable
                 key-field="Id"
@@ -22,6 +39,61 @@
         </div>
     </lightning-card>
 
+    <!-- Search and Filter Modal -->
+    <!-- Keep the component mounted so filter values are preserved. -->
+    <section
+        role="dialog"
+        tabindex="-1"
+        aria-modal="true"
+        aria-labelledby="filter-modal-heading"
+        class={filterModalClass}>
+
+        <div class="slds-modal__container">
+
+            <header class="slds-modal__header">
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    alternative-text="Close"
+                    title="Close"
+                    onclick={closeFilterModal}
+                    class="slds-modal__close">
+                </lightning-button-icon>
+
+                <h2
+                    id="filter-modal-heading"
+                    class="slds-text-heading_medium">
+                    Search and Filter Transactions
+                </h2>
+
+                <p class="slds-m-top_x-small slds-text-color_weak">
+                    Narrow your transactions by name, type, category or date.
+                </p>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium">
+                <c-transaction-search-filters
+                    onfilterapply={handleFilterApply}
+                    onfiltererror={handleFilterError}>
+                </c-transaction-search-filters>
+            </div>
+
+            <footer class="slds-modal__footer">
+                <lightning-button
+                    label="Close"
+                    onclick={closeFilterModal}>
+                </lightning-button>
+            </footer>
+
+        </div>
+    </section>
+
+    <template lwc:if={isFilterModalOpen}>
+        <div
+            class="slds-backdrop slds-backdrop_open"
+            onclick={closeFilterModal}>
+        </div>
+    </template>
+
     <!-- Edit Transaction Modal -->
     <template lwc:if={isEditModalOpen}>
         <section
@@ -32,6 +104,7 @@
             class="slds-modal slds-fade-in-open">
 
             <div class="slds-modal__container">
+
                 <header class="slds-modal__header">
                     <lightning-button-icon
                         icon-name="utility:close"
@@ -49,6 +122,7 @@
                 </header>
 
                 <div class="slds-modal__content slds-p-around_medium edit-form">
+
                     <lightning-input
                         label="Transaction Name"
                         value={editName}
@@ -98,6 +172,7 @@
                         onchange={handleEditInputChange}
                         required>
                     </lightning-combobox>
+
                 </div>
 
                 <footer class="slds-modal__footer">
@@ -115,6 +190,7 @@
                         disabled={isSaving}>
                     </lightning-button>
                 </footer>
+
             </div>
         </section>
 

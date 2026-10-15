@@ -1,0 +1,12 @@
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 480px) {
+    .header-actions {
+        gap: 0.25rem;
+    }
+}

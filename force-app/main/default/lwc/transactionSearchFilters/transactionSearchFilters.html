@@ -1,66 +1,70 @@
+
 <template>
-    <lightning-card
-        title="Search and Filter Transactions"
-        icon-name="utility:filterList">
+    <div class="filter-content">
 
-        <div class="slds-p-around_medium">
-            <div class="slds-grid slds-wrap slds-gutters">
+        <lightning-input
+            type="search"
+            label="Search by Transaction Name"
+            placeholder="e.g. Salary, Rent, Groceries"
+            value={searchTerm}
+            onchange={handleSearchChange}>
+        </lightning-input>
 
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_small">
-                    <lightning-input
-                        type="search"
-                        label="Search by Transaction Name"
-                        placeholder="e.g. Salary, Rent, Groceries"
-                        value={searchTerm}
-                        onchange={handleSearchChange}>
-                    </lightning-input>
-                </div>
+        <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
 
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_small">
-                    <lightning-combobox
-                        label="Transaction Type"
-                        value={transactionType}
-                        options={transactionTypeOptions}
-                        onchange={handleTypeChange}>
-                    </lightning-combobox>
-                </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_small">
-                    <lightning-combobox
-                        label="Category"
-                        value={category}
-                        options={categoryOptions}
-                        onchange={handleCategoryChange}>
-                    </lightning-combobox>
-                </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_small">
-                    <lightning-input
-                        type="date"
-                        label="From Date"
-                        value={startDate}
-                        onchange={handleStartDateChange}>
-                    </lightning-input>
-                </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-m-bottom_small">
-                    <lightning-input
-                        type="date"
-                        label="To Date"
-                        value={endDate}
-                        onchange={handleEndDateChange}>
-                    </lightning-input>
-                </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3 slds-align-bottom slds-m-bottom_small">
-                    <lightning-button
-                        label="Clear Filters"
-                        icon-name="utility:refresh"
-                        onclick={handleClearFilters}>
-                    </lightning-button>
-                </div>
-
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                <lightning-combobox
+                    label="Transaction Type"
+                    value={transactionType}
+                    options={transactionTypeOptions}
+                    onchange={handleTypeChange}>
+                </lightning-combobox>
             </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                <lightning-combobox
+                    label="Category"
+                    value={category}
+                    options={categoryOptions}
+                    onchange={handleCategoryChange}>
+                </lightning-combobox>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-top_small">
+                <lightning-input
+                    type="date"
+                    label="From Date"
+                    value={startDate}
+                    onchange={handleStartDateChange}>
+                </lightning-input>
+            </div>
+
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-top_small">
+                <lightning-input
+                    type="date"
+                    label="To Date"
+                    value={endDate}
+                    onchange={handleEndDateChange}>
+                </lightning-input>
+            </div>
+
         </div>
-    </lightning-card>
+
+        <div class="filter-actions slds-m-top_large">
+            <lightning-button
+                label="Reset"
+                icon-name="utility:refresh"
+                onclick={handleClearFilters}>
+            </lightning-button>
+
+            <lightning-button
+                class="apply-button"
+                label="Apply Filters"
+                icon-name="utility:filterList"
+                variant="brand"
+                onclick={handleApplyFilters}>
+            </lightning-button>
+        </div>
+
+    </div>
 </template>
